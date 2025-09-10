@@ -1,0 +1,16 @@
+﻿sound_id,name,file_path,volume,category,loop,fade_in,fade_out
+1,bgm_title,bgm/title.mp3,0.7,bgm,true,2.0,1.0
+2,bgm_morning,bgm/morning.mp3,0.6,bgm,true,2.0,1.0
+3,bgm_daily,bgm/daily.mp3,0.6,bgm,true,2.0,1.0
+4,bgm_tension,bgm/tension.mp3,0.8,bgm,true,1.5,1.0
+5,bgm_peaceful,bgm/peaceful.mp3,0.5,bgm,true,2.5,1.5
+6,se_click,se/click.mp3,0.5,se,false,0,0
+7,se_match,se/match.mp3,0.6,se,false,0,0
+8,se_levelup,se/levelup.mp3,0.8,se,false,0,0.5
+9,se_battle,se/battle_start.mp3,0.7,se,false,0,0
+10,se_victory,se/victory.mp3,0.8,se,false,0,1.0
+11,voice_misaki_01,voice/misaki/01.mp3,0.8,voice,false,0,0
+12,voice_reina_01,voice/reina/01.mp3,0.8,voice,false,0,0
+13,voice_yoh_01,voice/yoh/01.mp3,0.8,voice,false,0,0
+14,se_shuffle,se/shuffle.mp3,0.6,se,false,0,0
+15,se_hint,se/hint.mp3,0.5,se,false,0,0

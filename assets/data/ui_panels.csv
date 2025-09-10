@@ -1,0 +1,7 @@
+﻿panel_id,panel_name,x_pos,y_pos,width,height,opacity,z_index,animation
+1,main_menu,center,center,400,500,100,10,fade_in
+2,dialogue_panel,center,bottom,900,250,95,20,slide_up
+3,battle_hud,0,0,1280,100,90,15,none
+4,character_info,left,center,400,600,85,25,slide_left
+5,ending_panel,center,center,1000,700,100,30,fade_in
+6,loading_panel,center,center,300,200,90,50,pulse

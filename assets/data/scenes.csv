@@ -1,0 +1,9 @@
+﻿scene_id,scene_name,background_image,bgm_file,time_of_day,weather_effect
+1,学園正門,bg_school_gate.png,bgm_morning.mp3,morning,cherry_blossom
+2,教室,bg_classroom.png,bgm_daily.mp3,afternoon,none
+3,麻雀部室,bg_club_room.png,bgm_tension.mp3,evening,none
+4,屋上,bg_rooftop.png,bgm_peaceful.mp3,sunset,none
+5,図書館,bg_library.png,bgm_quiet.mp3,afternoon,none
+6,廊下,bg_hallway.png,bgm_daily.mp3,morning,none
+7,生徒会室,bg_student_council.png,bgm_serious.mp3,afternoon,none
+8,中庭,bg_courtyard.png,bgm_peaceful.mp3,evening,cherry_blossom

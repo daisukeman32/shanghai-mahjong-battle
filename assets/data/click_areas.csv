@@ -1,0 +1,7 @@
+﻿area_id,scene_id,x_start,y_start,x_end,y_end,action,effect,sound
+1,1,100,100,300,400,show_character,sparkle,se_appear.mp3
+2,3,400,200,600,500,start_battle,flash,se_battle.mp3
+3,1,0,0,1280,720,advance_scene,none,se_click.mp3
+4,2,50,50,250,450,character_interact,glow,se_interact.mp3
+5,7,600,300,900,600,challenge_accepted,intense,se_challenge.mp3
+6,4,200,100,500,300,romantic_moment,hearts,se_romantic.mp3

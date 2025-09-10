@@ -1,0 +1,5 @@
+﻿ending_id,ending_type,title,description,condition_score,condition_level,bg_image,bgm_file
+1,TRUE,守護者の誓い,全員を最強装備で守護,500000,5,ending_true.png,bgm_true.mp3
+2,NORMAL,新たな日常,麻雀部の正式メンバーに,300000,3,ending_normal.png,bgm_normal.mp3
+3,BAD,挫折と再起,修行からやり直し,0,0,ending_bad.png,bgm_bad.mp3
+4,SECRET,裏の支配者,学園の秘密を知る,999999,5,ending_secret.png,bgm_secret.mp3

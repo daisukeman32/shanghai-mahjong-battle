@@ -1,0 +1,6 @@
+﻿char_id,name,name_reading,grade,personality,base_image,voice_type
+1,天野美咲,あまの みさき,1年生,元気,misaki_base.png,genki
+2,氷室玲奈,ひむろ れいな,2年生,クール,reina_base.png,cool
+3,紅月妖,くれづき よう,3年生,妖艶,yoh_base.png,mysterious
+4,桜井先生,さくらい せんせい,教師,優雅,teacher_base.png,elegant
+5,プレイヤー,主人公,2年生,転校生,player_base.png,none

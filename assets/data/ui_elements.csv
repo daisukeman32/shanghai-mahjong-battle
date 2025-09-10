@@ -1,0 +1,11 @@
+﻿element_id,element_type,name,image_normal,image_hover,image_pressed,width,height,sound_click
+1,button,start_game,btn_start_n.png,btn_start_h.png,btn_start_p.png,200,60,se_click.mp3
+2,button,continue,btn_continue_n.png,btn_continue_h.png,btn_continue_p.png,200,60,se_click.mp3
+3,button,gallery,btn_gallery_n.png,btn_gallery_h.png,btn_gallery_p.png,200,60,se_click.mp3
+4,button,settings,btn_settings_n.png,btn_settings_h.png,btn_settings_p.png,200,60,se_click.mp3
+5,panel,dialogue_box,panel_dialogue.png,,,800,200,
+6,button,hint,btn_hint_n.png,btn_hint_h.png,btn_hint_p.png,120,40,se_hint.mp3
+7,button,undo,btn_undo_n.png,btn_undo_h.png,btn_undo_p.png,120,40,se_undo.mp3
+8,button,shuffle,btn_shuffle_n.png,btn_shuffle_h.png,btn_shuffle_p.png,120,40,se_shuffle.mp3
+9,button,skip,btn_skip_n.png,btn_skip_h.png,btn_skip_p.png,80,30,se_ui.mp3
+10,button,auto,btn_auto_n.png,btn_auto_h.png,btn_auto_p.png,80,30,se_ui.mp3

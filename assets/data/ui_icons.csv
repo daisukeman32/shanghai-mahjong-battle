@@ -1,0 +1,11 @@
+﻿icon_id,icon_name,image_file,tooltip_text,size,animation_hover
+1,hint,icon_hint.png,ヒントを表示,48,pulse
+2,undo,icon_undo.png,一手戻す,48,rotate
+3,shuffle,icon_shuffle.png,牌をシャッフル,48,shake
+4,save,icon_save.png,ゲームを保存,32,glow
+5,load,icon_load.png,ゲームを読込,32,glow
+6,settings,icon_settings.png,設定を開く,32,spin
+7,volume,icon_volume.png,音量調整,32,bounce
+8,fullscreen,icon_fullscreen.png,全画面表示,32,scale
+9,skip,icon_skip.png,スキップ,24,flash
+10,auto,icon_auto.png,オート,24,flash

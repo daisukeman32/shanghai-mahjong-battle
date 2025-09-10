@@ -1,0 +1,11 @@
+﻿anim_id,name,type,duration,easing,delay,loop
+1,fade_in,opacity,0.5,ease-in,0,false
+2,slide_up,transform,0.3,ease-out,0.1,false
+3,pulse,scale,1.0,ease-in-out,0,true
+4,bounce,transform,0.6,bounce,0,false
+5,shake,transform,0.5,ease-in-out,0,false
+6,rotate,transform,0.4,ease-in,0,false
+7,scale_up,scale,0.3,ease-out,0,false
+8,slide_left,transform,0.4,ease-out,0,false
+9,flash,opacity,0.2,linear,0,false
+10,glow,box-shadow,1.0,ease-in-out,0,true

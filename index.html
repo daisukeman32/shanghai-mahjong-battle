@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麻雀学園バトルストーリー</title>
+    
+    <!-- Noto Sans JP for Japanese text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Sawarabi+Mincho:wght@400&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- PapaParse for CSV handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="src/css/main.css">
+</head>
+<body>
+    <!-- Game Container -->
+    <div id="game-container">
+        
+        <!-- Title Screen -->
+        <div id="title-screen" class="screen active">
+            <div class="title-background">
+                <div class="title-content">
+                    <h1 class="title-logo">
+                        <span class="mahjong-symbol">🀄</span>
+                        <span class="title-main">麻雀学園</span>
+                        <span class="title-sub">バトルストーリー</span>
+                    </h1>
+                    
+                    <div class="character-silhouettes">
+                        <div class="silhouette" id="misaki-silhouette"></div>
+                        <div class="silhouette" id="reina-silhouette"></div>
+                        <div class="silhouette" id="yoh-silhouette"></div>
+                    </div>
+                    
+                    <div class="menu-buttons">
+                        <button class="menu-btn" id="start-game">はじめから</button>
+                        <button class="menu-btn" id="continue-game">つづきから</button>
+                        <button class="menu-btn" id="gallery">ギャラリー</button>
+                        <button class="menu-btn" id="settings">設定</button>
+                    </div>
+                </div>
+                
+                <div class="sakura-particles"></div>
+            </div>
+        </div>
+        
+        <!-- Dialogue Screen -->
+        <div id="dialogue-screen" class="screen">
+            <div class="dialogue-background">
+                <div class="character-area">
+                    <div id="character-image" class="character-image"></div>
+                </div>
+                
+                <div class="dialogue-panel">
+                    <div class="character-name" id="character-name"></div>
+                    <div class="dialogue-text" id="dialogue-text"></div>
+                </div>
+                
+                <div class="dialogue-controls">
+                    <button class="control-btn" id="skip-btn">Skip</button>
+                    <button class="control-btn" id="auto-btn">Auto</button>
+                    <button class="control-btn" id="log-btn">Log</button>
+                    <button class="control-btn" id="menu-btn">Menu</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-layout">
+                <!-- Left Panel: Character Info -->
+                <div class="character-panel">
+                    <div class="character-display">
+                        <div id="opponent-image" class="opponent-image"></div>
+                        <div class="equipment-level">
+                            <span>装備Lv:</span>
+                            <div class="level-stars" id="level-stars">
+                                <span class="star">☆</span>
+                                <span class="star">☆</span>
+                                <span class="star">☆</span>
+                                <span class="star">☆</span>
+                                <span class="star">☆</span>
+                            </div>
+                        </div>
+                        <div class="hp-bar">
+                            <div class="hp-label">HP:</div>
+                            <div class="hp-container">
+                                <div class="hp-fill" id="hp-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Panel: Mahjong Board -->
+                <div class="game-board">
+                    <div id="shanghai-board" class="shanghai-board">
+                        <!-- Tiles will be dynamically generated -->
+                    </div>
+                    
+                    <div class="game-hud">
+                        <div class="score-info">
+                            <span>スコア: <span id="current-score">0</span></span>
+                            <span>時間: <span id="time-remaining">05:00</span></span>
+                            <span>連鎖: x<span id="combo-count">1</span></span>
+                        </div>
+                        
+                        <div class="game-controls">
+                            <button class="game-btn" id="hint-btn">ヒント</button>
+                            <button class="game-btn" id="undo-btn">一手戻す</button>
+                            <button class="game-btn" id="shuffle-btn">シャッフル</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ending Screen -->
+        <div id="ending-screen" class="screen">
+            <div class="ending-background">
+                <div class="ending-content">
+                    <div class="ending-cg" id="ending-cg"></div>
+                    
+                    <div class="ending-info">
+                        <div class="ending-title" id="ending-title">🏆 TRUE ENDING 🏆</div>
+                        <div class="ending-subtitle" id="ending-subtitle">「麻雀学園の新たな伝説」</div>
+                        
+                        <div class="achievement-info">
+                            <div class="achievement-stars">
+                                達成度: <span id="achievement-stars">★★★★★</span>
+                            </div>
+                            <div class="unlock-info">
+                                解放要素: <span id="unlock-element">隠しキャラクター</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ending-buttons">
+                            <button class="ending-btn" id="to-title">タイトルへ</button>
+                            <button class="ending-btn" id="to-gallery">ギャラリー</button>
+                            <button class="ending-btn" id="continue-playing">続ける</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Loading indicator -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">読み込み中...</div>
+    </div>
+    
+    <!-- Scripts -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

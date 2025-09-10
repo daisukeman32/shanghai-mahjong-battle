@@ -1,0 +1,16 @@
+﻿dialogue_id,scene_id,char_id,emotion,text,voice_file,effect
+1,1,1,smile,"先輩！麻雀で勝負してください！",misaki_01.mp3,shake
+2,1,1,shy,"負けたら…装備してもらいますから…",misaki_02.mp3,blush
+3,2,2,serious,"私の計算を破れるかしら？",reina_01.mp3,none
+4,2,2,confident,"論理的思考では負けませんよ",reina_02.mp3,none
+5,3,3,mysterious,"ふふ、面白い転校生ですね",yoh_01.mp3,sparkle
+6,3,3,confident,"この学園の頂点は私よ",yoh_02.mp3,aura
+7,1,5,normal,"これが桜華麻雀学園か…",player_01.mp3,none
+8,1,5,determined,"負けるわけにはいかない！",player_02.mp3,none
+9,2,1,happy,"先輩、強いですね！",misaki_03.mp3,bounce
+10,2,1,embarrassed,"も、もう一度お願いします！",misaki_04.mp3,blush
+11,3,2,impressed,"なかなかやりますね",reina_03.mp3,none
+12,3,2,serious,"次は負けません",reina_04.mp3,none
+13,7,3,elegant,"生徒会長として歓迎しますわ",yoh_03.mp3,formal
+14,7,3,challenging,"でも、甘く見ないでくださいね",yoh_04.mp3,intimidate
+15,4,1,peaceful,"ここからの夕日、きれいですね",misaki_05.mp3,peaceful
