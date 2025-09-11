@@ -298,6 +298,34 @@ export class CSVManager {
     }
 
     /**
+     * シーンデータの取得
+     * @param {number} sceneId - シーンID
+     * @returns {Object|null} シーンデータ
+     */
+    getScene(sceneId) {
+        return this.getById('scenes', sceneId, 'scene_id');
+    }
+
+    /**
+     * エンディングデータの取得
+     * @param {string} endingType - エンディングタイプ
+     * @returns {Object|null} エンディングデータ
+     */
+    getEnding(endingType) {
+        return this.findOne('endings', item => item.ending_type === endingType);
+    }
+
+    /**
+     * シーン別会話データの取得
+     * @param {number} sceneId - シーンID
+     * @returns {Array} 会話データの配列
+     */
+    getDialoguesByScene(sceneId) {
+        return this.findData('dialogues', item => item.scene_id == sceneId)
+            .sort((a, b) => a.dialogue_id - b.dialogue_id);
+    }
+
+    /**
      * すべてのデータを取得（デバッグ用）
      * @returns {Object} 全データのオブジェクト
      */

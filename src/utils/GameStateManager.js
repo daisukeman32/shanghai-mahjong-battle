@@ -527,4 +527,206 @@ export class GameStateManager {
         
         console.log('🔄 Game state reset');
     }
+
+    /**
+     * 倒したキャラクターのリストを取得
+     */
+    getDefeatedCharacters() {
+        return Object.keys(this.state.characters)
+            .filter(charId => this.state.characters[charId].victories > 0)
+            .map(charId => parseInt(charId));
+    }
+
+    /**
+     * キャラクター統計情報の取得
+     */
+    getCharacterStats(characterId) {
+        const char = this.state.characters[characterId];
+        if (!char) {
+            return { wins: 0, totalScore: 0, battles: 0, defeats: 0 };
+        }
+        
+        return {
+            wins: char.victories || 0,
+            totalScore: char.totalScore || 0,
+            battles: char.battleCount || 0,
+            defeats: (char.battleCount || 0) - (char.victories || 0)
+        };
+    }
+
+    /**
+     * キャラクターの親密度取得
+     */
+    getIntimacy(characterId) {
+        const char = this.state.characters[characterId];
+        return char ? char.intimacy || 0 : 0;
+    }
+
+    /**
+     * 親密度の増加
+     */
+    increaseIntimacy(characterId, amount) {
+        if (this.state.characters[characterId]) {
+            this.state.characters[characterId].intimacy = 
+                Math.min(100, (this.state.characters[characterId].intimacy || 0) + amount);
+            this.markUnsaved();
+        }
+    }
+
+    /**
+     * キャラクターレベルの取得
+     */
+    getCharacterLevel(characterId) {
+        const char = this.state.characters[characterId];
+        return char ? char.equipment?.level || 1 : 1;
+    }
+
+    /**
+     * キャラクターレベルの設定
+     */
+    setCharacterLevel(characterId, level) {
+        if (this.state.characters[characterId]) {
+            if (!this.state.characters[characterId].equipment) {
+                this.state.characters[characterId].equipment = {};
+            }
+            this.state.characters[characterId].equipment.level = level;
+            this.markUnsaved();
+        }
+    }
+
+    /**
+     * 装備アップグレード
+     */
+    upgradeCharacterEquipment(characterId) {
+        const char = this.state.characters[characterId];
+        if (char && char.equipment) {
+            const currentLevel = char.equipment.level || 1;
+            if (currentLevel < 5) {
+                char.equipment.level = currentLevel + 1;
+                this.markUnsaved();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * バトル結果の記録
+     */
+    recordBattleResult(characterId, result, score) {
+        const char = this.state.characters[characterId];
+        if (!char) return;
+
+        char.battleCount = (char.battleCount || 0) + 1;
+        char.totalScore = (char.totalScore || 0) + score;
+
+        if (result === 'win' || result === 'perfect_win') {
+            char.victories = (char.victories || 0) + 1;
+        }
+
+        if (result === 'perfect_win') {
+            this.state.player.statistics.perfectGames = 
+                (this.state.player.statistics.perfectGames || 0) + 1;
+        }
+
+        this.state.player.statistics.gamesPlayed = 
+            (this.state.player.statistics.gamesPlayed || 0) + 1;
+        
+        if (result === 'win' || result === 'perfect_win') {
+            this.state.player.statistics.gamesWon = 
+                (this.state.player.statistics.gamesWon || 0) + 1;
+        }
+
+        this.state.player.totalScore = (this.state.player.totalScore || 0) + score;
+        this.markUnsaved();
+    }
+
+    /**
+     * ゲーム統計の取得
+     */
+    getGameStats() {
+        return {
+            playTime: this.state.player.totalPlayTime || 0,
+            totalScore: this.state.player.totalScore || 0,
+            wins: this.state.player.statistics.gamesWon || 0,
+            defeats: (this.state.player.statistics.gamesPlayed || 0) - (this.state.player.statistics.gamesWon || 0),
+            perfectWins: this.state.player.statistics.perfectGames || 0,
+            gameOvers: this.state.gameOvers || 0,
+            maxWinStreak: this.state.maxWinStreak || 0
+        };
+    }
+
+    /**
+     * 全キャラクターが最大レベルかチェック
+     */
+    areAllCharactersMaxLevel() {
+        return Object.values(this.state.characters)
+            .every(char => char.equipment?.level >= 5);
+    }
+
+    /**
+     * 全キャラクターが最大親密度かチェック
+     */
+    areAllCharactersMaxIntimacy() {
+        return Object.values(this.state.characters)
+            .every(char => char.intimacy >= 100);
+    }
+
+    /**
+     * 秘密条件の確認
+     */
+    hasSecretCondition() {
+        // 隠し条件: 全キャラクター3勝以上かつ親密度80以上
+        return Object.values(this.state.characters)
+            .every(char => char.victories >= 3 && char.intimacy >= 80);
+    }
+
+    /**
+     * エンディング条件のチェック
+     */
+    checkEndingConditions() {
+        const defeatedCount = this.getDefeatedCharacters().length;
+        return defeatedCount >= 3; // 全キャラクター撃破でエンディング
+    }
+
+    /**
+     * アンロック処理
+     */
+    unlock(content) {
+        if (!this.state.unlockedContent) {
+            this.state.unlockedContent = [];
+        }
+        if (!this.state.unlockedContent.includes(content)) {
+            this.state.unlockedContent.push(content);
+            this.markUnsaved();
+        }
+    }
+
+    /**
+     * エンディングアンロック
+     */
+    unlockEnding(endingType) {
+        if (!this.state.unlockedEndings) {
+            this.state.unlockedEndings = [];
+        }
+        if (!this.state.unlockedEndings.includes(endingType)) {
+            this.state.unlockedEndings.push(endingType);
+            this.markUnsaved();
+        }
+    }
+
+    /**
+     * アンロック済みアチーブメント取得
+     */
+    getUnlockedAchievements() {
+        return this.state.player.achievements || [];
+    }
+
+    /**
+     * 会話既読チェック
+     */
+    isDialogueRead(sceneId, dialogueIndex) {
+        const key = `${sceneId}-${dialogueIndex}`;
+        return this.state.readDialogues?.includes(key) || false;
+    }
 }

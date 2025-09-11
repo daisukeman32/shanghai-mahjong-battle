@@ -31,7 +31,7 @@ class MahjongGakuenBattleStory {
         this.sceneManager = new SceneManager();
         
         this.isInitialized = false;
-        this.loadingElement = document.getElementById('loading');
+        // ローディング要素は動的に取得
     }
 
     /**
@@ -114,17 +114,30 @@ class MahjongGakuenBattleStory {
      * シーンの登録
      */
     registerScenes() {
+        // 上海パズルインスタンスの作成
+        const shanghaiPuzzle = new ShanghaiPuzzle();
+        
+        // 装備システムの作成
+        const equipmentSystem = new EquipmentSystem(this.csvManager);
+        
         const titleScene = new TitleScene(this.csvManager, this.audioManager);
         const dialogueScene = new DialogueScene(this.csvManager, this.audioManager);
-        const gameScene = new GameScene(this.csvManager, this.audioManager);
+        const gameScene = new GameScene(this.csvManager, this.audioManager, shanghaiPuzzle);
         const endingScene = new EndingScene(this.csvManager, this.audioManager);
 
         this.sceneManager.registerScene('title', titleScene);
         this.sceneManager.registerScene('dialogue', dialogueScene);
         this.sceneManager.registerScene('game', gameScene);
         this.sceneManager.registerScene('ending', endingScene);
+        
+        // ゲームインスタンスへの参照を保存
+        this.shanghaiPuzzle = shanghaiPuzzle;
+        this.equipmentSystem = equipmentSystem;
 
         console.log('🎬 シーン登録完了');
+        
+        // デバッグ用: グローバルアクセスを提供
+        window.debugPuzzle = shanghaiPuzzle;
     }
 
     /**
@@ -237,12 +250,18 @@ class MahjongGakuenBattleStory {
      * ローディング表示の制御
      */
     showLoading(show) {
-        if (this.loadingElement) {
+        const loadingElement = document.getElementById('loading');
+        if (loadingElement) {
             if (show) {
-                this.loadingElement.classList.add('active');
+                loadingElement.classList.add('active');
+                loadingElement.style.display = 'flex';
             } else {
-                this.loadingElement.classList.remove('active');
+                loadingElement.classList.remove('active');
+                loadingElement.style.display = 'none';
             }
+            console.log(`🔄 Loading ${show ? 'shown' : 'hidden'}`);
+        } else {
+            console.warn('⚠️ Loading element not found');
         }
     }
 
@@ -291,8 +310,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         window.MahjongGame = new MahjongGakuenBattleStory();
         await window.MahjongGame.initialize();
+        console.log('✅ ゲーム初期化成功');
     } catch (error) {
         console.error('💥 ゲーム起動失敗:', error);
+        // エラーをページに表示
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ff4757; color: white; padding: 20px; border-radius: 8px;
+            font-family: monospace; max-width: 80%; z-index: 9999;
+        `;
+        errorDiv.innerHTML = `
+            <h3>🚨 ゲーム初期化エラー</h3>
+            <p>${error.message}</p>
+            <pre>${error.stack}</pre>
+        `;
+        document.body.appendChild(errorDiv);
     }
 });
 
@@ -306,12 +339,12 @@ window.addEventListener('beforeunload', () => {
 });
 
 // デバッグ用のグローバル関数
-if (process.env.NODE_ENV === 'development') {
+if (typeof process === 'undefined' || process.env?.NODE_ENV === 'development') {
     window.debugGame = () => {
         console.log('🐛 デバッグ情報:', {
-            gameState: window.MahjongGame.gameState.getCurrentState(),
-            csvData: window.MahjongGame.csvManager.getAllData(),
-            currentScene: window.MahjongGame.sceneManager.getCurrentSceneName()
+            gameState: window.MahjongGame?.gameState?.getCurrentState(),
+            csvData: window.MahjongGame?.csvManager?.getAllData(),
+            currentScene: window.MahjongGame?.sceneManager?.getCurrentSceneName()
         });
     };
 }
