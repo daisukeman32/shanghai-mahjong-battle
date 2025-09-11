@@ -719,12 +719,35 @@
             return false;
         }
         
+        // 🎯 ダイナミックスケール計算
+        function calculateDynamicScale() {
+            const boardElement = document.getElementById('game-board');
+            const boardWidth = boardElement.offsetWidth;
+            const boardHeight = boardElement.offsetHeight;
+            
+            // 画面サイズに応じてスケールを動的計算
+            const scaleX = Math.max(boardWidth / 800, 0.5); // 最小50%
+            const scaleY = Math.max(boardHeight / 600, 0.5); // 最小50%
+            const scale = Math.min(scaleX, scaleY); // 小さい方を採用
+            
+            return {
+                tileSpaceX: Math.max(25 * scale, 20),
+                tileSpaceY: Math.max(35 * scale, 25),
+                layerOffset: Math.max(12 * scale, 8),
+                centerOffsetX: boardWidth / 2,
+                centerOffsetY: boardHeight / 2
+            };
+        }
+
         // 参考コード基盤の確実な描画システム（透明度なし）
         function renderBoard() {
             const boardElement = document.getElementById('game-board');
             boardElement.innerHTML = '';
             
             console.log(`📊 ゲームボード総牌数: ${gameBoard.size}枚 (目標: 144枚)`);
+            
+            // 🎯 ダイナミックスケール適用
+            const scale = calculateDynamicScale();
             
             for (const [key, tile] of gameBoard.entries()) {
                 if (matchedTiles.has(tile.id)) continue;
@@ -1033,6 +1056,15 @@
             initGame();
         }
         
+        // 🎯 ウィンドウリサイズ対応
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                renderBoard();
+                updateStats();
+                console.log('🖼️ ウィンドウリサイズに対応しました');
+            }, 100); // 100ms遅延でパフォーマンス向上
+        });
+
         // 🎯 ゲーム開始
         console.log('🚀 Ultimate Shanghai Mahjong - 本格画像素材対応版');
         
