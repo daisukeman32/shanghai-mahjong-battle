@@ -1,0 +1,55 @@
+{
+  "name": "mahjong-gakuen-battle-story",
+  "version": "1.0.0",
+  "description": "麻雀学園バトルストーリー - 上海パズル×ビジュアルノベル",
+  "main": "electron.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": [
+    "mahjong",
+    "shanghai",
+    "puzzle",
+    "visual-novel",
+    "electron",
+    "game"
+  ],
+  "author": "麻雀学園開発チーム",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "papaparse": "^5.4.1"
+  },
+  "build": {
+    "appId": "com.mahjong-gakuen.battle-story",
+    "productName": "麻雀学園バトルストーリー",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron.js",
+      "game/**/*",
+      "assets/**/*",
+      "data/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icons/app.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icons/app.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icons/app.png"
+    }
+  }
+}

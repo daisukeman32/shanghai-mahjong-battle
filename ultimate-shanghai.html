@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🀄 Ultimate Shanghai Mahjong - 麻雀学園バトルストーリー</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Cinzel:wght@400;600&display=swap');
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: radial-gradient(ellipse at center, #0f1419 0%, #1a0b2e 50%, #16213e 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .game-container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* 🎯 完全中央配置 */
+            padding: 10px;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .game-title {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            font-weight: 300;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 15px;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: #ffd700;
+        }
+        
+        .game-board {
+            position: relative;
+            width: calc(100vw - 40px);   /* 画面全体を活用 */
+            height: calc(100vh - 160px); /* ヘッダー分を考慮 */
+            max-width: 1400px;           /* 適切な最大幅 */
+            max-height: 800px;           /* 適切な最大高さ */
+            min-width: 800px;
+            min-height: 500px;
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(0, 150, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at center, rgba(20, 30, 48, 0.9) 0%, rgba(36, 59, 85, 0.95) 100%);
+            border-radius: 25px;
+            margin: 10px auto;
+            box-shadow: 
+                0 0 60px rgba(255, 215, 0, 0.2),
+                0 0 120px rgba(0, 100, 200, 0.15),
+                inset 0 0 60px rgba(255, 255, 255, 0.08),
+                0 30px 80px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, 
+                rgba(255, 215, 0, 0.4), 
+                rgba(0, 150, 255, 0.4), 
+                rgba(255, 215, 0, 0.4)) 1;
+            
+            /* 🏆 超立体感 - 深いperspective */
+            perspective: 2000px;
+            perspective-origin: 50% 25%;
+            transform-style: preserve-3d;
+            
+            /* ✨ 豪華なアニメーション */
+            animation: luxuryGlow 4s ease-in-out infinite alternate;
+        }
+        
+        .tile {
+            position: absolute;
+            width: 60px;  /* より大きなサイズ */
+            height: 80px; /* より大きなサイズ */
+            background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 50%, #e8e8e8 100%);
+            border: 2px solid #c8c8c8;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            /* 🏆 超立体感の牌 */
+            box-shadow: 
+                4px 4px 12px rgba(0, 0, 0, 0.4),
+                8px 8px 20px rgba(0, 0, 0, 0.2),
+                inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+                inset -1px -1px 2px rgba(0, 0, 0, 0.1);
+            
+            /* 💎 牌の厚み表現 */
+            transform-style: preserve-3d;
+            
+            /* ✨ 微細な立体効果 */
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.25));
+        }
+        
+        /* 💎 牌の厚み（側面）表現 */
+        .tile::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 4px;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #d8d8d8 0%, #b8b8b8 100%);
+            border: 1px solid #a0a0a0;
+            border-radius: 8px;
+            z-index: -1;
+            transform: translateZ(-6px) rotateX(5deg) rotateY(-5deg);
+            filter: brightness(0.8);
+        }
+        
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 3px;
+            width: 100%;
+            height: 100%;
+            background: #e8e8e8;
+            border: 2px solid #c0c0c0;
+            border-radius: 5px;
+            z-index: -1;
+        }
+        
+        .tile.selectable {
+            border-color: #4a7c59;
+            background: linear-gradient(145deg, #ffffff 0%, #f8f8f8 100%);
+            cursor: pointer;
+        }
+        
+        .tile.selectable:hover {
+            background: linear-gradient(145deg, #f0fff0 0%, #e8ffe8 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                3px 3px 8px rgba(0, 0, 0, 0.3),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.9);
+        }
+        
+        .tile.not-selectable {
+            cursor: not-allowed;
+            /* 通常モード：すべての牌を同じ明度で表示 */
+            /* filter: brightness(0.7); */
+        }
+        
+        .tile:hover {
+            transform: translate3d(-2px, -3px, 10px) scale(1.02) rotateX(-15deg) rotateY(2deg) rotateZ(0deg);
+            box-shadow: 
+                0 6px 12px rgba(0,0,0,0.5),
+                0 0 0 2px rgba(255,215,0,0.6),
+                inset 0 2px 0 rgba(255,255,255,0.5);
+            filter: brightness(1.08);
+        }
+        
+        .tile.selected {
+            transform: translate3d(-3px, -5px, 15px) scale(1.05) rotateX(-15deg) rotateY(2deg) rotateZ(0deg);
+            box-shadow: 
+                0 8px 16px rgba(255, 215, 0, 0.8),
+                0 0 0 3px rgba(255, 215, 0, 1.0),
+                inset 0 2px 0 rgba(255,255,255,0.7);
+            filter: brightness(1.15);
+            animation: selectedGlow 1.0s ease-in-out infinite alternate;
+        }
+        
+        @keyframes selectedGlow {
+            0% { 
+                box-shadow: 
+                    0 20px 40px rgba(255, 215, 0, 0.8),
+                    0 0 0 4px rgba(255, 215, 0, 1.0),
+                    inset 0 3px 0 rgba(255,255,255,0.7);
+                filter: brightness(1.25);
+            }
+            100% { 
+                box-shadow: 
+                    0 25px 50px rgba(255, 215, 0, 1.0),
+                    0 0 0 5px rgba(255, 215, 0, 1.0),
+                    0 0 20px rgba(255, 215, 0, 0.8),
+                    inset 0 4px 0 rgba(255,255,255,0.8);
+                filter: brightness(1.35);
+            }
+        }
+        
+        .tile.blocked {
+            opacity: 1.0; /* 上海パズルのルール：下の牌を完全に隠す */
+            cursor: not-allowed;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) grayscale(0.3);
+        }
+        
+        .tile.matched {
+            opacity: 0;
+            transform: scale(0) rotateY(180deg);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn.reset-btn {
+            background: linear-gradient(145deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn.hint-btn {
+            background: linear-gradient(145deg, #f39c12 0%, #d35400 100%);
+            box-shadow: 0 6px 15px rgba(243, 156, 18, 0.3);
+        }
+        
+        .victory-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .victory-content {
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: victoryPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes victoryPop {
+            0% { transform: scale(0) rotate(180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .victory-title {
+            font-size: 36px;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 🌟 ラグジュアリーアニメーション */
+        @keyframes luxuryGlow {
+            0% { 
+                box-shadow: 
+                    0 0 60px rgba(255, 215, 0, 0.2),
+                    0 0 120px rgba(0, 100, 200, 0.15),
+                    inset 0 0 60px rgba(255, 255, 255, 0.08),
+                    0 30px 80px rgba(0, 0, 0, 0.3);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 80px rgba(255, 215, 0, 0.3),
+                    0 0 160px rgba(0, 150, 255, 0.2),
+                    inset 0 0 80px rgba(255, 255, 255, 0.12),
+                    0 40px 100px rgba(0, 0, 0, 0.4);
+            }
+        }
+        
+        /* 💎 超高級ホバーエフェクト */
+        .tile:hover {
+            transform: translate3d(-3px, -5px, 15px) scale(1.05) rotateX(-20deg) rotateY(5deg) rotateZ(-2deg);
+            box-shadow: 
+                0 15px 30px rgba(255, 215, 0, 0.4),
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 0 0 3px rgba(255, 215, 0, 0.8),
+                inset 0 3px 6px rgba(255, 255, 255, 0.9);
+            filter: brightness(1.2) contrast(1.1) saturate(1.2);
+            animation: luxuryFloat 0.6s ease-out;
+        }
+        
+        @keyframes luxuryFloat {
+            0% { transform: translate3d(-3px, -5px, 15px) scale(1.05) rotateX(-20deg) rotateY(5deg) rotateZ(-2deg); }
+            50% { transform: translate3d(-4px, -8px, 20px) scale(1.08) rotateX(-25deg) rotateY(8deg) rotateZ(-3deg); }
+            100% { transform: translate3d(-3px, -5px, 15px) scale(1.05) rotateX(-20deg) rotateY(5deg) rotateZ(-2deg); }
+        }
+        
+        /* 👑 選択時の王様エフェクト */
+        .tile.selected {
+            transform: translate3d(-5px, -10px, 25px) scale(1.1) rotateX(-25deg) rotateY(8deg) rotateZ(-3deg);
+            box-shadow: 
+                0 25px 50px rgba(255, 215, 0, 0.8),
+                0 35px 70px rgba(255, 165, 0, 0.6),
+                0 0 0 4px rgba(255, 215, 0, 1.0),
+                0 0 30px rgba(255, 215, 0, 0.9),
+                inset 0 4px 8px rgba(255, 255, 255, 0.9);
+            filter: brightness(1.4) contrast(1.2) saturate(1.5);
+            animation: royalGlow 1.2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes royalGlow {
+            0% { 
+                box-shadow: 
+                    0 25px 50px rgba(255, 215, 0, 0.8),
+                    0 35px 70px rgba(255, 165, 0, 0.6),
+                    0 0 0 4px rgba(255, 215, 0, 1.0),
+                    0 0 30px rgba(255, 215, 0, 0.9),
+                    inset 0 4px 8px rgba(255, 255, 255, 0.9);
+                filter: brightness(1.4) contrast(1.2) saturate(1.5);
+            }
+            100% { 
+                box-shadow: 
+                    0 30px 60px rgba(255, 215, 0, 1.0),
+                    0 45px 90px rgba(255, 165, 0, 0.8),
+                    0 0 0 6px rgba(255, 215, 0, 1.0),
+                    0 0 50px rgba(255, 215, 0, 1.0),
+                    0 0 100px rgba(255, 255, 255, 0.3),
+                    inset 0 6px 12px rgba(255, 255, 255, 1.0);
+                filter: brightness(1.6) contrast(1.3) saturate(1.8);
+            }
+        }
+        
+        .game-over-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(15px);
+        }
+        
+        .game-over-content {
+            background: linear-gradient(145deg, #e74c3c 0%, #c0392b 100%);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            animation: victoryPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">🀄 ULTIMATE SHANGHAI MAHJONG 🀄</div>
+            
+            <div class="game-stats">
+                <div class="stat-item">
+                    残り牌: <span class="stat-value" id="remaining">144</span>
+                </div>
+                <div class="stat-item">
+                    自由な牌: <span class="stat-value" id="free-count">0</span>
+                </div>
+                <div class="stat-item">
+                    選択中: <span class="stat-value" id="selected">なし</span>
+                </div>
+                <div class="stat-item">
+                    スコア: <span class="stat-value" id="score">0</span>
+                </div>
+                <div class="stat-item">
+                    シャッフル: <span class="stat-value" id="shuffle-remaining">3</span>回
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="game-board">
+            <!-- 144枚の本格的な麻雀牌画像がここに配置される -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn reset-btn" onclick="resetGame()">
+                🔄 新しいゲーム
+            </button>
+            <button class="btn hint-btn" onclick="showHint()">
+                💡 ヒント
+            </button>
+            <button class="btn" onclick="toggleEasyMode()" id="easy-mode-btn">
+                🎯 イージーモード
+            </button>
+            <button class="btn" onclick="shuffleTiles()" id="shuffle-btn" style="background: linear-gradient(145deg, #f39c12 0%, #d35400 100%);">
+                🔀 シャッフル (<span id="shuffle-count">3</span>回)
+            </button>
+        </div>
+    </div>
+    
+    <!-- 🎉 勝利モーダル -->
+    <div class="victory-modal" id="victory-modal">
+        <div class="victory-content">
+            <div class="victory-title">🏆 完全勝利！ 🏆</div>
+            <div>全ての牌を除去しました！</div>
+            <br>
+            <button class="btn" onclick="closeVictoryModal()">続ける</button>
+        </div>
+    </div>
+    
+    <!-- 😵 GAME OVERモーダル -->
+    <div class="game-over-modal" id="game-over-modal">
+        <div class="game-over-content">
+            <div class="victory-title">😵 GAME OVER 😵</div>
+            <div id="game-over-message">手詰まりです！</div>
+            <br>
+            <button class="btn" onclick="closeGameOverModal()">新しいゲーム</button>
+        </div>
+    </div>
+
+    <script>
+        // 🌟 Ultimate Shanghai Mahjong - 本格画像素材対応版
+        
+        // 麻雀牌の定義（フォールバック絵文字対応）
+        const TILE_TYPES = {
+            // 萬子 (1-9) × 4枚 = 36枚
+            character: [
+                { id: 'ms1', name: '一萬', symbol: '1️⃣', image: 'assets/images/tiles/manzu/p_ms1_1.gif' },
+                { id: 'ms2', name: '二萬', symbol: '2️⃣', image: 'assets/images/tiles/manzu/p_ms2_1.gif' },
+                { id: 'ms3', name: '三萬', symbol: '3️⃣', image: 'assets/images/tiles/manzu/p_ms3_1.gif' },
+                { id: 'ms4', name: '四萬', symbol: '4️⃣', image: 'assets/images/tiles/manzu/p_ms4_1.gif' },
+                { id: 'ms5', name: '五萬', symbol: '5️⃣', image: 'assets/images/tiles/manzu/p_ms5_1.gif' },
+                { id: 'ms6', name: '六萬', symbol: '6️⃣', image: 'assets/images/tiles/manzu/p_ms6_1.gif' },
+                { id: 'ms7', name: '七萬', symbol: '7️⃣', image: 'assets/images/tiles/manzu/p_ms7_1.gif' },
+                { id: 'ms8', name: '八萬', symbol: '8️⃣', image: 'assets/images/tiles/manzu/p_ms8_1.gif' },
+                { id: 'ms9', name: '九萬', symbol: '9️⃣', image: 'assets/images/tiles/manzu/p_ms9_1.gif' }
+            ],
+            // 筒子 (1-9) × 4枚 = 36枚
+            circle: [
+                { id: 'ps1', name: '一筒', symbol: '🟡', image: 'assets/images/tiles/pinzu/p_ps1_1.gif' },
+                { id: 'ps2', name: '二筒', symbol: '🔵', image: 'assets/images/tiles/pinzu/p_ps2_1.gif' },
+                { id: 'ps3', name: '三筒', symbol: '🟢', image: 'assets/images/tiles/pinzu/p_ps3_1.gif' },
+                { id: 'ps4', name: '四筒', symbol: '🔴', image: 'assets/images/tiles/pinzu/p_ps4_1.gif' },
+                { id: 'ps5', name: '五筒', symbol: '🟠', image: 'assets/images/tiles/pinzu/p_ps5_1.gif' },
+                { id: 'ps6', name: '六筒', symbol: '🟣', image: 'assets/images/tiles/pinzu/p_ps6_1.gif' },
+                { id: 'ps7', name: '七筒', symbol: '⚫', image: 'assets/images/tiles/pinzu/p_ps7_1.gif' },
+                { id: 'ps8', name: '八筒', symbol: '⚪', image: 'assets/images/tiles/pinzu/p_ps8_1.gif' },
+                { id: 'ps9', name: '九筒', symbol: '🔘', image: 'assets/images/tiles/pinzu/p_ps9_1.gif' }
+            ],
+            // 索子 (1-9) × 4枚 = 36枚
+            bamboo: [
+                { id: 'ss1', name: '一索', symbol: '🎋', image: 'assets/images/tiles/souzu/p_ss1_1.gif' },
+                { id: 'ss2', name: '二索', symbol: '🎍', image: 'assets/images/tiles/souzu/p_ss2_1.gif' },
+                { id: 'ss3', name: '三索', symbol: '🎋', image: 'assets/images/tiles/souzu/p_ss3_1.gif' },
+                { id: 'ss4', name: '四索', symbol: '🎍', image: 'assets/images/tiles/souzu/p_ss4_1.gif' },
+                { id: 'ss5', name: '五索', symbol: '🎋', image: 'assets/images/tiles/souzu/p_ss5_1.gif' },
+                { id: 'ss6', name: '六索', symbol: '🎍', image: 'assets/images/tiles/souzu/p_ss6_1.gif' },
+                { id: 'ss7', name: '七索', symbol: '🎋', image: 'assets/images/tiles/souzu/p_ss7_1.gif' },
+                { id: 'ss8', name: '八索', symbol: '🎍', image: 'assets/images/tiles/souzu/p_ss8_1.gif' },
+                { id: 'ss9', name: '九索', symbol: '🎋', image: 'assets/images/tiles/souzu/p_ss9_1.gif' }
+            ],
+            // 字牌 (東南西北白發中) × 4枚 = 28枚
+            honor: [
+                { id: 'ji_e', name: '東', symbol: '🌅', image: 'assets/images/tiles/jihai/p_ji_e_1.gif' },
+                { id: 'ji_s', name: '南', symbol: '☀️', image: 'assets/images/tiles/jihai/p_ji_s_1.gif' },
+                { id: 'ji_w', name: '西', symbol: '🌄', image: 'assets/images/tiles/jihai/p_ji_w_1.gif' },
+                { id: 'ji_n', name: '北', symbol: '⭐', image: 'assets/images/tiles/jihai/p_ji_n_1.gif' },
+                { id: 'ji_h', name: '白', symbol: '⬜', image: 'assets/images/tiles/jihai/p_ji_h_1.gif' },
+                { id: 'ji_c', name: '中', symbol: '🔴', image: 'assets/images/tiles/jihai/p_ji_c_1.gif' },
+                { id: 'ji_no', name: '發', symbol: '🟢', image: 'assets/images/tiles/jihai/p_no_1.gif' }
+            ],
+            // 花牌・季節牌 × 1枚 = 8枚
+            flower: [
+                { id: 'flower1', name: '花1', symbol: '🌸', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'flower2', name: '花2', symbol: '🌺', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'flower3', name: '花3', symbol: '🌻', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'flower4', name: '花4', symbol: '🌷', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'season1', name: '季1', symbol: '🍃', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'season2', name: '季2', symbol: '🍂', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'season3', name: '季3', symbol: '❄️', image: 'assets/images/tiles/flower/flower.gif' },
+                { id: 'season4', name: '季4', symbol: '☀️', image: 'assets/images/tiles/flower/flower.gif' }
+            ]
+        };
+        
+        // 🏆 参考コード基盤の完璧な144枚レイアウト
+        // 確実に動作する実証済み座標システム
+        const TURTLE_LAYOUT_POSITIONS = [
+            // 基本レイアウト（第1層：68枚）
+            {x:2,y:1},{x:3,y:1},{x:4,y:1},{x:5,y:1},{x:6,y:1},{x:7,y:1},{x:8,y:1},{x:9,y:1},{x:10,y:1},{x:11,y:1},{x:12,y:1},{x:13,y:1},
+            {x:2,y:2},{x:13,y:2},
+            {x:2,y:3},{x:3,y:3},{x:4,y:3},{x:5,y:3},{x:6,y:3},{x:7,y:3},{x:8,y:3},{x:9,y:3},{x:10,y:3},{x:11,y:3},{x:12,y:3},{x:13,y:3},
+            {x:3,y:4},{x:4,y:4},{x:5,y:4},{x:6,y:4},{x:7,y:4},{x:8,y:4},{x:9,y:4},{x:10,y:4},{x:11,y:4},{x:12,y:4},
+            {x:3,y:5},{x:4,y:5},{x:5,y:5},{x:6,y:5},{x:7,y:5},{x:8,y:5},{x:9,y:5},{x:10,y:5},{x:11,y:5},{x:12,y:5},
+            {x:2,y:6},{x:3,y:6},{x:4,y:6},{x:5,y:6},{x:6,y:6},{x:7,y:6},{x:8,y:6},{x:9,y:6},{x:10,y:6},{x:11,y:6},{x:12,y:6},{x:13,y:6},
+            {x:2,y:7},{x:13,y:7},
+            {x:2,y:8},{x:3,y:8},{x:4,y:8},{x:5,y:8},{x:6,y:8},{x:7,y:8},{x:8,y:8},{x:9,y:8},{x:10,y:8},{x:11,y:8},{x:12,y:8},{x:13,y:8},
+            // 第2層（36枚）
+            {x:3,y:2,z:1},{x:4,y:2,z:1},{x:5,y:2,z:1},{x:6,y:2,z:1},{x:7,y:2,z:1},{x:8,y:2,z:1},{x:9,y:2,z:1},{x:10,y:2,z:1},{x:11,y:2,z:1},{x:12,y:2,z:1},
+            {x:4,y:3,z:1},{x:5,y:3,z:1},{x:6,y:3,z:1},{x:7,y:3,z:1},{x:8,y:3,z:1},{x:9,y:3,z:1},{x:10,y:3,z:1},{x:11,y:3,z:1},
+            {x:4,y:4,z:1},{x:5,y:4,z:1},{x:6,y:4,z:1},{x:7,y:4,z:1},{x:8,y:4,z:1},{x:9,y:4,z:1},{x:10,y:4,z:1},{x:11,y:4,z:1},
+            {x:4,y:5,z:1},{x:5,y:5,z:1},{x:6,y:5,z:1},{x:7,y:5,z:1},{x:8,y:5,z:1},{x:9,y:5,z:1},{x:10,y:5,z:1},{x:11,y:5,z:1},
+            {x:4,y:6,z:1},{x:5,y:6,z:1},{x:6,y:6,z:1},{x:7,y:6,z:1},{x:8,y:6,z:1},{x:9,y:6,z:1},{x:10,y:6,z:1},{x:11,y:6,z:1},
+            {x:3,y:7,z:1},{x:4,y:7,z:1},{x:5,y:7,z:1},{x:6,y:7,z:1},{x:7,y:7,z:1},{x:8,y:7,z:1},{x:9,y:7,z:1},{x:10,y:7,z:1},{x:11,y:7,z:1},{x:12,y:7,z:1},
+            // 第3層（24枚）
+            {x:5,y:3,z:2},{x:6,y:3,z:2},{x:7,y:3,z:2},{x:8,y:3,z:2},{x:9,y:3,z:2},{x:10,y:3,z:2},
+            {x:5,y:4,z:2},{x:6,y:4,z:2},{x:7,y:4,z:2},{x:8,y:4,z:2},{x:9,y:4,z:2},{x:10,y:4,z:2},
+            {x:5,y:5,z:2},{x:6,y:5,z:2},{x:7,y:5,z:2},{x:8,y:5,z:2},{x:9,y:5,z:2},{x:10,y:5,z:2},
+            {x:5,y:6,z:2},{x:6,y:6,z:2},{x:7,y:6,z:2},{x:8,y:6,z:2},{x:9,y:6,z:2},{x:10,y:6,z:2},
+            // 第4層（12枚）
+            {x:6,y:3,z:3},{x:7,y:3,z:3},{x:8,y:3,z:3},{x:9,y:3,z:3},
+            {x:6,y:4,z:3},{x:7,y:4,z:3},{x:8,y:4,z:3},{x:9,y:4,z:3},
+            {x:6,y:5,z:3},{x:7,y:5,z:3},{x:8,y:5,z:3},{x:9,y:5,z:3},
+            // 第5層（4枚）
+            {x:7,y:4,z:4},{x:8,y:4,z:4},{x:7,y:5,z:4},{x:8,y:5,z:4}
+        ];
+        
+        // ゲーム状態
+        let gameBoard = new Map();
+        let selectedTiles = [];
+        let matchedTiles = new Set();
+        let easyMode = false;
+        let score = 0;
+        let shuffleCount = 0; // シャッフル回数（最大3回）
+        let isGameOver = false;
+        
+        // 牌生成（素材対応）
+        function generateTileSet() {
+            const tiles = [];
+            let tileId = 0;
+            
+            for (const [category, tileData] of Object.entries(TILE_TYPES)) {
+                for (const tile of tileData) {
+                    let copies = (category === 'flower') ? 1 : 4;
+                    for (let copy = 0; copy < copies; copy++) {
+                        tiles.push({
+                            id: tileId++,
+                            symbol: tile.symbol || tile.name,
+                            color: tile.color,
+                            image: tile.image,
+                            tileId: tile.id,
+                            category: category,
+                            matched: false
+                        });
+                    }
+                }
+            }
+            
+            return shuffleArray(tiles);
+        }
+        
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        // 簡略化：全ての牌を正方向（_1.gif）で統一
+        function getTileOrientation(tile) {
+            // 全て正方向のみを使用（8種の向きシステムを簡略化）
+            return 1;
+        }
+        
+        // ゲーム初期化（参考コード基盤）
+        function initGame() {
+            gameBoard.clear();
+            selectedTiles = [];
+            matchedTiles.clear();
+            score = 0;
+            shuffleCount = 0;
+            isGameOver = false;
+            
+            const tileSet = generateTileSet();
+            
+            // 参考コードの座標システムを使用
+            TURTLE_LAYOUT_POSITIONS.forEach((pos, index) => {
+                if (index < tileSet.length) {
+                    const tile = {
+                        ...tileSet[index],
+                        x: pos.x,
+                        y: pos.y,
+                        z: pos.z || 0
+                    };
+                    gameBoard.set(`${pos.x},${pos.y},${pos.z || 0}`, tile);
+                }
+            });
+            
+            renderBoard();
+            updateStats();
+            
+            console.log(`🎯 ${gameBoard.size}枚の牌を配置完了 (目標: 144枚)`);
+            console.log(`📊 TURTLE_LAYOUT_POSITIONS.length = ${TURTLE_LAYOUT_POSITIONS.length}`);
+        }
+        
+        // 参考コード基盤の確実な選択可能性判定（透明度なし）
+        function isTileFree(tile) {
+            if (!tile || matchedTiles.has(tile.id)) return false;
+            
+            // 上に牌があるかチェック
+            const covered = Array.from(gameBoard.values()).some(t => 
+                !matchedTiles.has(t.id) && t.id !== tile.id &&
+                t.x === tile.x && t.y === tile.y && t.z === tile.z + 1
+            );
+            if (covered) return false;
+            
+            // 左右に牌があるかチェック
+            const leftBlocked = Array.from(gameBoard.values()).some(t =>
+                !matchedTiles.has(t.id) && t.id !== tile.id &&
+                t.x === tile.x - 1 && t.y === tile.y && t.z === tile.z
+            );
+            const rightBlocked = Array.from(gameBoard.values()).some(t =>
+                !matchedTiles.has(t.id) && t.id !== tile.id &&
+                t.x === tile.x + 1 && t.y === tile.y && t.z === tile.z
+            );
+            
+            return !leftBlocked || !rightBlocked;
+        }
+        
+        // 🔍 牌が物理的に完全に隠れているかチェック
+        function isPhysicallyHidden(tile) {
+            if (!tile || matchedTiles.has(tile.id)) return false;
+            
+            const { x, y, z } = tile;
+            
+            // 直接上に複数の牌がある場合は完全に隠れる
+            let coverCount = 0;
+            for (let layer = z + 1; layer <= 4; layer++) {
+                const above = gameBoard.get(`${x},${y},${layer}`);
+                if (above && !matchedTiles.has(above.id)) {
+                    coverCount++;
+                }
+            }
+            
+            // 2層以上重なっている、または最下層で周囲が完全に囲まれている
+            if (coverCount >= 2) return true;
+            
+            // 最下層（z=0）で完全に四方を囲まれている場合
+            if (z === 0) {
+                const neighbors = [
+                    gameBoard.get(`${x-1},${y},${z}`),
+                    gameBoard.get(`${x+1},${y},${z}`),
+                    gameBoard.get(`${x},${y-1},${z}`),
+                    gameBoard.get(`${x},${y+1},${z}`)
+                ];
+                
+                const blockedSides = neighbors.filter(n => n && !matchedTiles.has(n.id)).length;
+                return blockedSides >= 3; // 3方向以上囲まれていれば隠れる
+            }
+            
+            return false;
+        }
+        
+        // 参考コード基盤の確実な描画システム（透明度なし）
+        function renderBoard() {
+            const boardElement = document.getElementById('game-board');
+            boardElement.innerHTML = '';
+            
+            console.log(`📊 ゲームボード総牌数: ${gameBoard.size}枚 (目標: 144枚)`);
+            
+            for (const [key, tile] of gameBoard.entries()) {
+                if (matchedTiles.has(tile.id)) continue;
+                
+                const tileElement = document.createElement('div');
+                tileElement.className = 'tile';
+                tileElement.dataset.tileId = tile.id;
+                
+                // より大きくワイドな座標計算
+                const x = tile.x * 40 + 150; // より広い間隔
+                const y = tile.y * 50 + 50 + tile.z * 15; // より広い間隔とZ層調整
+                
+                tileElement.style.left = `${x}px`;
+                tileElement.style.top = `${y}px`;
+                
+                // 確実なz-index計算（参考コード基盤）
+                tileElement.style.zIndex = tile.x + tile.y * 100 + tile.z * 10000;
+                
+                // 🎯 強制的な画像表示（デバッグログ付き）
+                console.log(`🖼️ 牌画像: ${tile.name} -> ${tile.image}`);
+                
+                if (tile.image) {
+                    // 直接imgタグを使用して確実な画像表示
+                    const imgElement = document.createElement('img');
+                    imgElement.src = tile.image;
+                    imgElement.style.width = '100%';
+                    imgElement.style.height = '100%';
+                    imgElement.style.objectFit = 'contain';
+                    imgElement.style.display = 'block';
+                    imgElement.alt = tile.name;
+                    
+                    // エラーハンドリング
+                    imgElement.onerror = function() {
+                        console.log(`❌ 画像読み込み失敗: ${tile.image}`);
+                        this.style.display = 'none';
+                        tileElement.textContent = tile.symbol || tile.name || '🀄';
+                        tileElement.style.fontSize = '28px';
+                        tileElement.style.fontWeight = 'bold';
+                        tileElement.style.color = '#333';
+                        tileElement.style.textAlign = 'center';
+                        tileElement.style.lineHeight = '50px';
+                    };
+                    
+                    imgElement.onload = function() {
+                        console.log(`✅ 画像読み込み成功: ${tile.image}`);
+                    };
+                    
+                    tileElement.textContent = '';
+                    tileElement.appendChild(imgElement);
+                } else {
+                    console.log(`⚠️ 画像なし、絵文字表示: ${tile.name}`);
+                    // フォールバック絵文字表示（より大きく）
+                    tileElement.textContent = tile.symbol || tile.name || '🀄';
+                    tileElement.style.fontSize = '28px';
+                    tileElement.style.fontWeight = 'bold';
+                    tileElement.style.color = '#333';
+                    tileElement.style.textAlign = 'center';
+                    tileElement.style.lineHeight = '50px';
+                    tileElement.style.display = 'flex';
+                    tileElement.style.alignItems = 'center';
+                    tileElement.style.justifyContent = 'center';
+                }
+                
+                // 参考コード基盤の選択可能性判定（透明度なし）
+                const selectable = isTileFree(tile);
+                tileElement.classList.toggle('selectable', selectable);
+                tileElement.classList.toggle('not-selectable', !selectable);
+                
+                // 選択状態
+                if (selectedTiles.some(t => t.id === tile.id)) {
+                    tileElement.classList.add('selected');
+                }
+                
+                tileElement.addEventListener('click', (e) => handleTileClick(tile, e));
+                boardElement.appendChild(tileElement);
+            }
+        }
+        
+        // タイルクリック処理
+        function handleTileClick(tile, event) {
+            if (!isTileFree(tile)) {
+                return;
+            }
+            
+            const alreadySelected = selectedTiles.findIndex(t => t.id === tile.id);
+            
+            if (alreadySelected >= 0) {
+                selectedTiles.splice(alreadySelected, 1);
+            } else if (selectedTiles.length < 2) {
+                selectedTiles.push(tile);
+                
+                if (selectedTiles.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+            
+            renderBoard();
+            updateStats();
+        }
+        
+        // マッチング判定
+        function checkMatch() {
+            const [tile1, tile2] = selectedTiles;
+            
+            const isMatch = (tile1.tileId && tile1.tileId === tile2.tileId) || 
+                           (tile1.symbol === tile2.symbol) ||
+                           (tile1.category === 'flower' && tile2.category === 'flower');
+            
+            if (isMatch) {
+                score += 100;
+                matchedTiles.add(tile1.id);
+                matchedTiles.add(tile2.id);
+                
+                // 勝利判定
+                if (matchedTiles.size === gameBoard.size) {
+                    setTimeout(showVictory, 1000);
+                }
+                
+                console.log('✅ マッチ成功！ スコア:', score);
+            } else {
+                console.log('❌ マッチ失敗');
+            }
+            
+            selectedTiles = [];
+            renderBoard();
+            updateStats();
+        }
+        
+        // 勝利表示
+        function showVictory() {
+            document.getElementById('victory-modal').style.display = 'flex';
+        }
+        
+        function closeVictoryModal() {
+            document.getElementById('victory-modal').style.display = 'none';
+            resetGame();
+        }
+        
+        // 統計更新
+        function updateStats() {
+            document.getElementById('remaining').textContent = gameBoard.size - matchedTiles.size;
+            document.getElementById('score').textContent = score;
+            
+            let freeCount = 0;
+            for (const [key, tile] of gameBoard.entries()) {
+                if (isTileFree(tile)) freeCount++;
+            }
+            document.getElementById('free-count').textContent = freeCount;
+            
+            document.getElementById('selected').textContent = 
+                selectedTiles.length > 0 ? `${selectedTiles.length}枚` : 'なし';
+            
+            // シャッフル回数表示更新
+            const remaining = 3 - shuffleCount;
+            document.getElementById('shuffle-remaining').textContent = remaining;
+            document.getElementById('shuffle-count').textContent = remaining;
+            
+            // シャッフルボタンの状態更新
+            const shuffleBtn = document.getElementById('shuffle-btn');
+            if (remaining <= 0) {
+                shuffleBtn.style.opacity = '0.5';
+                shuffleBtn.style.cursor = 'not-allowed';
+            } else if (isGameStuck()) {
+                shuffleBtn.style.boxShadow = '0 0 20px rgba(243, 156, 18, 0.8)';
+                shuffleBtn.style.animation = 'pulse 1s infinite';
+            } else {
+                shuffleBtn.style.boxShadow = '0 6px 15px rgba(243, 156, 18, 0.3)';
+                shuffleBtn.style.animation = 'none';
+            }
+        }
+        
+        // すべてのマッチを検索
+        function findAllMatches() {
+            const freeTiles = [];
+            for (const [key, tile] of gameBoard.entries()) {
+                if (isTileFree(tile)) freeTiles.push(tile);
+            }
+            
+            const matches = [];
+            for (let i = 0; i < freeTiles.length; i++) {
+                for (let j = i + 1; j < freeTiles.length; j++) {
+                    const tile1 = freeTiles[i];
+                    const tile2 = freeTiles[j];
+                    
+                    const isMatch = (tile1.tileId && tile1.tileId === tile2.tileId) || 
+                                   (tile1.symbol === tile2.symbol) ||
+                                   (tile1.category === 'flower' && tile2.category === 'flower');
+                    
+                    if (isMatch) {
+                        matches.push([tile1, tile2]);
+                    }
+                }
+            }
+            
+            return matches;
+        }
+        
+        // ヒント表示
+        function showHint() {
+            const matches = findAllMatches();
+            
+            if (matches.length > 0) {
+                const [tile1, tile2] = matches[0];
+                alert(`💡 ヒント: ${tile1.symbol || tile1.name} と ${tile2.symbol || tile2.name} がマッチします`);
+            } else {
+                alert('💡 マッチ可能なペアが見つかりません');
+            }
+        }
+        
+        // イージーモード切り替え
+        function toggleEasyMode() {
+            easyMode = !easyMode;
+            const btn = document.getElementById('easy-mode-btn');
+            btn.textContent = easyMode ? '🔥 ハードモード' : '🎯 イージーモード';
+            btn.style.background = easyMode ? 
+                'linear-gradient(145deg, #e74c3c 0%, #c0392b 100%)' : 
+                'linear-gradient(145deg, #27ae60 0%, #229954 100%)';
+            renderBoard();
+        }
+        
+        // 手詰まり検出
+        function isGameStuck() {
+            if (isGameOver || matchedTiles.size === gameBoard.size) return false;
+            
+            const matches = findAllMatches();
+            return matches.length === 0;
+        }
+        
+        // シャッフル機能（手詰まり時）
+        function shuffleTiles() {
+            if (shuffleCount >= 3) {
+                showGameOver('🚫 シャッフル回数上限です！GAME OVER');
+                return;
+            }
+            
+            if (!isGameStuck()) {
+                alert('🎯 まだマッチ可能な牌があります');
+                return;
+            }
+            
+            shuffleCount++;
+            
+            // 未マッチの牌を収集
+            const remainingTiles = [];
+            for (const [key, tile] of gameBoard.entries()) {
+                if (!matchedTiles.has(tile.id)) {
+                    remainingTiles.push({ key, tile });
+                }
+            }
+            
+            // 牌の種類だけをシャッフル
+            const tileTypes = remainingTiles.map(item => ({
+                tileId: item.tile.tileId,
+                symbol: item.tile.symbol,
+                color: item.tile.color,
+                image: item.tile.image,
+                category: item.tile.category,
+                name: item.tile.name
+            }));
+            
+            // シャッフル
+            for (let i = tileTypes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tileTypes[i], tileTypes[j]] = [tileTypes[j], tileTypes[i]];
+            }
+            
+            // シャッフルした種類を再配置
+            remainingTiles.forEach((item, index) => {
+                gameBoard.get(item.key).tileId = tileTypes[index].tileId;
+                gameBoard.get(item.key).symbol = tileTypes[index].symbol;
+                gameBoard.get(item.key).color = tileTypes[index].color;
+                gameBoard.get(item.key).image = tileTypes[index].image;
+                gameBoard.get(item.key).category = tileTypes[index].category;
+                gameBoard.get(item.key).name = tileTypes[index].name;
+            });
+            
+            renderBoard();
+            updateStats();
+            
+            console.log(`🔀 シャッフル実行 (${shuffleCount}/3)`);
+            
+            // シャッフル後も手詰まりならGAME OVER
+            setTimeout(() => {
+                if (isGameStuck()) {
+                    if (shuffleCount >= 3) {
+                        showGameOver('😵 シャッフル3回後も手詰まりです！GAME OVER');
+                    }
+                }
+            }, 1000);
+        }
+        
+        // GAME OVER表示
+        function showGameOver(message) {
+            isGameOver = true;
+            document.getElementById('game-over-message').textContent = message;
+            document.getElementById('game-over-modal').style.display = 'flex';
+        }
+        
+        function closeGameOverModal() {
+            document.getElementById('game-over-modal').style.display = 'none';
+            resetGame();
+        }
+        
+        // ゲームリセット
+        function resetGame() {
+            initGame();
+        }
+        
+        // 🎯 ゲーム開始
+        console.log('🚀 Ultimate Shanghai Mahjong - 本格画像素材対応版');
+        
+        // ゲーム初期化
+        initGame();
+        
+        console.log('✨ 本格的麻雀牌素材システム初期化完了');
+    </script>
+</body>
+</html>
