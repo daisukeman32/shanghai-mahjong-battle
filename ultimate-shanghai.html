@@ -217,6 +217,31 @@
             animation: selectedGlow 1.0s ease-in-out infinite alternate;
         }
         
+        /* 🔴 ヒント用オーバーレイ */
+        .hint-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100000; /* 牌の最大z-indexより確実に上 */
+        }
+        
+        .hint-highlight-overlay {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.4);
+            border-radius: 8px;
+            animation: hintPulse 1.5s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 200000; /* 牌の最大z-indexより確実に上に表示 */
+        }
+        
+        @keyframes hintPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
         @keyframes selectedGlow {
             0% { 
                 box-shadow: 
@@ -397,6 +422,8 @@
         
         <div class="game-board" id="game-board">
             <!-- 144枚の本格的な麻雀牌画像がここに配置される -->
+            <!-- 🔴 ヒント用オーバーレイ -->
+            <div class="hint-overlay" id="hint-overlay"></div>
         </div>
         
         <div class="controls">
@@ -405,9 +432,6 @@
             </button>
             <button class="btn hint-btn" onclick="showHint()">
                 💡 ヒント
-            </button>
-            <button class="btn" onclick="toggleEasyMode()" id="easy-mode-btn">
-                🎯 イージーモード
             </button>
             <button class="btn" onclick="shuffleTiles()" id="shuffle-btn" style="background: linear-gradient(145deg, #f39c12 0%, #d35400 100%);">
                 🔀 シャッフル (<span id="shuffle-count">3</span>回)
@@ -551,7 +575,6 @@
         let gameBoard = new Map();
         let selectedTiles = [];
         let matchedTiles = new Set();
-        let easyMode = false;
         let score = 0;
         let shuffleCount = 0; // シャッフル回数（最大3回）
         let isGameOver = false;
@@ -567,6 +590,7 @@
                     for (let copy = 0; copy < copies; copy++) {
                         tiles.push({
                             id: tileId++,
+                            name: tile.name,
                             symbol: tile.symbol || tile.name,
                             color: tile.color,
                             image: tile.image,
@@ -622,6 +646,7 @@
             
             renderBoard();
             updateStats();
+            updateHintButton();
             
             console.log(`🎯 ${gameBoard.size}枚の牌を配置完了 (目標: 144枚)`);
             console.log(`📊 TURTLE_LAYOUT_POSITIONS.length = ${TURTLE_LAYOUT_POSITIONS.length}`);
@@ -806,10 +831,22 @@
                 tileElement.addEventListener('click', (e) => handleTileClick(tile, e));
                 boardElement.appendChild(tileElement);
             }
+            
+            // 🔴 オーバーレイを再作成（innerHTML = '' で削除されるため）
+            const existingOverlay = document.getElementById('hint-overlay');
+            if (!existingOverlay) {
+                const hintOverlay = document.createElement('div');
+                hintOverlay.className = 'hint-overlay';
+                hintOverlay.id = 'hint-overlay';
+                boardElement.appendChild(hintOverlay);
+            }
         }
         
         // タイルクリック処理
         function handleTileClick(tile, event) {
+            // 牌クリック時にヒントをクリア
+            clearHint();
+            
             if (!isTileFree(tile)) {
                 return;
             }
@@ -834,9 +871,15 @@
         function checkMatch() {
             const [tile1, tile2] = selectedTiles;
             
-            const isMatch = (tile1.tileId && tile1.tileId === tile2.tileId) || 
-                           (tile1.symbol === tile2.symbol) ||
-                           (tile1.category === 'flower' && tile2.category === 'flower');
+            // 🎯 正しい麻雀牌マッチング判定
+            const isMatch = (
+                // 同じ牌種類（萬子、筒子、索子の同じ数字）
+                (tile1.tileId === tile2.tileId) ||
+                // 花牌は任意の花牌同士でマッチ
+                (tile1.category === 'flower' && tile2.category === 'flower') ||
+                // 四季牌は任意の四季牌同士でマッチ  
+                (tile1.category === 'season' && tile2.category === 'season')
+            );
             
             if (isMatch) {
                 score += 100;
@@ -914,9 +957,22 @@
                     const tile1 = freeTiles[i];
                     const tile2 = freeTiles[j];
                     
-                    const isMatch = (tile1.tileId && tile1.tileId === tile2.tileId) || 
-                                   (tile1.symbol === tile2.symbol) ||
-                                   (tile1.category === 'flower' && tile2.category === 'flower');
+                    // 🎯 正しい麻雀牌マッチング判定（findAllMatchesでも統一）
+                    const isMatch = (
+                        // 同じ牌種類（萬子、筒子、索子の同じ数字）
+                        (tile1.tileId === tile2.tileId) ||
+                        // 花牌は任意の花牌同士でマッチ
+                        (tile1.category === 'flower' && tile2.category === 'flower') ||
+                        // 四季牌は任意の四季牌同士でマッチ  
+                        (tile1.category === 'season' && tile2.category === 'season')
+                    );
+                    
+                    // デバッグ: マッチした牌の詳細を表示
+                    if (isMatch) {
+                        console.log(`✅ マッチ発見: ${tile1.tileId}(ID:${tile1.id}) と ${tile2.tileId}(ID:${tile2.id})`);
+                        console.log(`   牌1: ${tile1.symbol || tile1.name} (カテゴリ: ${tile1.category})`);
+                        console.log(`   牌2: ${tile2.symbol || tile2.name} (カテゴリ: ${tile2.category})`);
+                    }
                     
                     if (isMatch) {
                         matches.push([tile1, tile2]);
@@ -928,27 +984,118 @@
         }
         
         // ヒント表示
+        let hintTiles = [];
+        let hintTimeout;
+        let hintCount = 0;
+        const MAX_HINTS = 3;
+        
         function showHint() {
+            // ヒント使用制限チェック
+            if (hintCount >= MAX_HINTS) {
+                console.log('💡 ヒント使用制限に達しました');
+                return;
+            }
+            
+            // 既存のヒントをクリア
+            clearHint();
+            
             const matches = findAllMatches();
+            console.log('🔍 検索結果:', matches.length, '組のマッチング');
             
             if (matches.length > 0) {
                 const [tile1, tile2] = matches[0];
-                alert(`💡 ヒント: ${tile1.symbol || tile1.name} と ${tile2.symbol || tile2.name} がマッチします`);
+                hintTiles = [tile1, tile2];
+                
+                console.log('🎯 ヒント牌:', tile1.tileId, 'と', tile2.tileId);
+                
+                // オーバーレイでヒント表示（アラート削除）
+                createHintOverlay(tile1);
+                createHintOverlay(tile2);
+                
+                // ヒント使用回数を増加
+                hintCount++;
+                updateHintButton();
+                
+                // 3秒後に自動的にヒントをクリア
+                hintTimeout = setTimeout(clearHint, 3000);
             } else {
-                alert('💡 マッチ可能なペアが見つかりません');
+                console.log('💡 マッチ可能なペアが見つかりません');
             }
         }
         
-        // イージーモード切り替え
-        function toggleEasyMode() {
-            easyMode = !easyMode;
-            const btn = document.getElementById('easy-mode-btn');
-            btn.textContent = easyMode ? '🔥 ハードモード' : '🎯 イージーモード';
-            btn.style.background = easyMode ? 
-                'linear-gradient(145deg, #e74c3c 0%, #c0392b 100%)' : 
-                'linear-gradient(145deg, #27ae60 0%, #229954 100%)';
-            renderBoard();
+        function createHintOverlay(tile) {
+            const tileElement = document.querySelector(`[data-tile-id="${tile.id}"]`);
+            if (!tileElement) {
+                console.log(`❌ 牌要素が見つかりません: ID=${tile.id}, tileId=${tile.tileId}`);
+                return;
+            }
+            
+            console.log(`🎯 オーバーレイ作成: ID=${tile.id}, tileId=${tile.tileId}, 要素見つかった`);
+            
+            const gameBoard = document.getElementById('game-board');
+            const overlay = document.getElementById('hint-overlay');
+            
+            // 🔧 修正: より正確な位置計算
+            // 牌要素のスタイル情報を直接取得
+            const tileStyle = window.getComputedStyle(tileElement);
+            const tileLeft = parseInt(tileStyle.left) || 0;
+            const tileTop = parseInt(tileStyle.top) || 0;
+            const tileWidth = parseInt(tileStyle.width) || tileElement.offsetWidth;
+            const tileHeight = parseInt(tileStyle.height) || tileElement.offsetHeight;
+            
+            console.log(`📍 修正後座標: left=${tileLeft}, top=${tileTop}, w=${tileWidth}, h=${tileHeight}`);
+            console.log(`📍 牌要素情報: offsetLeft=${tileElement.offsetLeft}, offsetTop=${tileElement.offsetTop}`);
+            
+            // オーバーレイ要素を作成
+            const hintElement = document.createElement('div');
+            hintElement.className = 'hint-highlight-overlay';
+            
+            // 🎯 牌要素の実際のCSS位置を使用
+            hintElement.style.left = tileLeft + 'px';
+            hintElement.style.top = tileTop + 'px';
+            hintElement.style.width = tileWidth + 'px';
+            hintElement.style.height = tileHeight + 'px';
+            
+            // デバッグ用の境界線と識別用背景色（より目立つように）
+            hintElement.style.border = '4px solid red';
+            hintElement.style.background = 'rgba(255, 0, 0, 0.6)';
+            hintElement.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.8)';
+            
+            overlay.appendChild(hintElement);
+            
+            console.log(`✅ オーバーレイ要素作成完了: left=${hintElement.style.left}, top=${hintElement.style.top}`);
         }
+        
+        function clearHint() {
+            // オーバーレイからヒント要素をすべて削除
+            const overlay = document.getElementById('hint-overlay');
+            if (overlay) {
+                overlay.innerHTML = '';
+            }
+            
+            hintTiles = [];
+            if (hintTimeout) {
+                clearTimeout(hintTimeout);
+                hintTimeout = null;
+            }
+        }
+        
+        function updateHintButton() {
+            const hintBtn = document.querySelector('.hint-btn');
+            if (hintBtn) {
+                const remaining = MAX_HINTS - hintCount;
+                if (remaining > 0) {
+                    hintBtn.textContent = `💡 ヒント (${remaining}回)`;
+                    hintBtn.disabled = false;
+                    hintBtn.style.opacity = '1';
+                } else {
+                    hintBtn.textContent = '💡 ヒント (0回)';
+                    hintBtn.disabled = true;
+                    hintBtn.style.opacity = '0.5';
+                }
+            }
+        }
+        
         
         // 手詰まり検出
         function isGameStuck() {
@@ -1035,6 +1182,10 @@
         
         // ゲームリセット
         function resetGame() {
+            // ヒント回数をリセット
+            hintCount = 0;
+            updateHintButton();
+            clearHint();
             initGame();
         }
         
